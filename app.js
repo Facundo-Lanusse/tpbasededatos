@@ -2,18 +2,134 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const ejs = require('ejs');
 const path = require('path');
+const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static files from the "views" directory
+// Servir archivos estáticos desde el directorio "views"
 app.use(express.static('views'));
 
 // Usa rutas relativas dentro del proyecto
 const dbPath = path.resolve(__dirname, './movies.db');
-const db = new sqlite3.Database(dbPath);
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error("Error conectando a la base de datos:", err);
+    } else {
+        console.log("Conectado a la base de datos de películas.");
+
+        // Creación de la nueva tabla users
+        const createUserTable = `
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_username TEXT UNIQUE NOT NULL,
+                user_name TEXT NOT NULL,
+                user_email TEXT UNIQUE NOT NULL,
+                user_password TEXT NOT NULL
+            );
+        `;
+
+        db.run(createUserTable, (err) => {
+            if (err) {
+                console.error("Error creando la tabla de usuarios:", err);
+            } else {
+                console.log("Tabla de usuarios creada o ya existe.");
+            }
+        });
+    }
+});
+
+// Middleware para analizar el cuerpo de las solicitudes POST
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configurar el motor de plantillas EJS
 app.set('view engine', 'ejs');
+
+// Ruta para la página de registro
+app.get('/signup', (req, res) => {
+    res.render('signup'); // Renderiza el formulario de registro
+});
+
+// Ruta para manejar el registro de usuarios
+app.post('/signup', (req, res) => {
+    const { user_name, username, user_email, user_password } = req.body;
+
+    // Validar que los campos no estén vacíos
+    if (!user_name || !username || !user_email || !user_password) {
+        return res.status(400).send("Todos los campos son obligatorios.");
+    }
+
+    // Verifica si el formato del correo electrónico es válido
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user_email)) {
+        return res.status(400).send("Correo electrónico no válido.");
+    }
+
+    // Primero, verifica si el nombre de usuario o el correo electrónico ya existen
+    const checkUserQuery = `SELECT * FROM users WHERE user_username = ? OR user_email = ?`;
+    db.get(checkUserQuery, [username, user_email], (err, row) => {
+        if (err) {
+            console.error("Error al verificar el usuario:", err);
+            return res.status(500).send("Error al registrar el usuario.");
+        }
+        if (row) {
+            // Si se encontró un usuario con el mismo nombre de usuario o correo electrónico
+            return res.status(400).send("El nombre de usuario o el correo electrónico ya existen.");
+        }
+
+        // Inserta los datos del usuario en la tabla de usuarios
+        const insertUserQuery = `
+            INSERT INTO users (user_name, user_username, user_email, user_password)
+            VALUES (?, ?, ?, ?);
+        `;
+
+        db.run(insertUserQuery, [user_name, username, user_email, user_password], function (err) {
+            if (err) {
+                console.error("Error al registrar el usuario:", err);
+                return res.status(500).send("Error al registrar el usuario.");
+            }
+
+            console.log("Usuario registrado exitosamente con user_id:", this.lastID);
+            // Redirigir a la página anterior
+            const referer = req.headers.referer || '/'; // Fallback a la raíz si no hay referer
+            res.redirect(referer); // Redirige a la página anterior
+        });
+    });
+});
+
+// Ruta para la página de inicio de sesión
+app.get('/login', (req, res) => {
+    res.render('login'); // Renderiza el formulario de inicio de sesión
+});
+
+// Ruta para manejar el inicio de sesión
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // Verificar si el nombre de usuario y la contraseña son correctos
+    const checkUserQuery = `SELECT * FROM users WHERE user_username = ?`;
+    db.get(checkUserQuery, [username], (err, row) => {
+        if (err) {
+            console.error("Error al verificar el usuario:", err);
+            return res.status(500).send("Error al iniciar sesión.");
+        }
+        if (!row) {
+            // Si no se encontró el usuario
+            return res.status(401).send("Nombre de usuario o contraseña incorrectos.");
+        }
+
+        // Aquí debes comparar las contraseñas
+        // Si usas texto plano, simplemente compara directamente
+        if (row.user_password !== password) {
+            return res.status(401).send("Nombre de usuario o contraseña incorrectos.");
+        }
+
+        console.log("Inicio de sesión exitoso para el usuario:", username);
+        // Redirigir a la página anterior
+        const referer = req.headers.referer || '/';
+        res.redirect(referer); // Redirige a la página anterior
+    });
+});
+
 
 // Ruta para la página de inicio
 app.get('/', (req, res) => {
@@ -310,6 +426,11 @@ app.get('/director/:id', (req, res) => {
             res.render('director', { directorName, actingMovies, directingMovies });
         });
     });
+});
+
+// Voy al login page
+app.get('/login', (req, res) => {
+    res.render('login');
 });
 
 // Iniciar el servidor
