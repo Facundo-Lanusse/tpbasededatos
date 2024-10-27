@@ -120,7 +120,22 @@
       outline: none;
       transition: border-color 0.3s ease;
       background-color: #f5f5f5;
-      appearance: none;
+      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 viewBox%3D%220 0 24 24%22 fill%3D%22%23333%22%3E%3Cpath d%3D%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E'); /* Flecha personalizada */
+      background-repeat: no-repeat;
+      background-position: right 15px center; /* Mueve la flecha 15px desde la derecha */
+      background-size: 16px;
+      appearance: none; /* Oculta la flecha predeterminada del sistema */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: #0078d4;
+    }
+
+    select:hover {
+      border-color: #0078d4;
     }
   </style>
 </head>
