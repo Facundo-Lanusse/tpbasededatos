@@ -2,6 +2,12 @@
 <html lang="es">
 <head>
   <title>MovieWeb</title>
+  
+  <!-- Para mayor organización ponemos los botones login y register en el header -->
+  <header>    
+    <a href="/login" class="login-button">Log In</a>
+    <a href="/signup" class="signup-button">Sign Up</a>
+</header>
   <style>
     /* Estilos generales */
     body {
@@ -9,29 +15,65 @@
       background-color: #f0f0f0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      justify-content: center; /* Centra el contenido verticalmente */
+      align-items: center; /* Centra el contenido horizontalmente */
       height: 100vh;
       margin: 0;
       padding: 20px;
+      position: relative;
+    }
+    .signup-button{
+      position: absolute;
+      top: 20px;
+      right: 115px;
+      background-color: #d400d0;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
     }
 
+    /* Botón de Log In */
+    .login-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #d400d0;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Estilos del contenido de la página */
     h1 {
       font-size: 36px;
       color: #333;
       margin-bottom: 30px;
-      text-align: center;
+      text-align: center; /* Alineación central del texto */
     }
 
     form {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px; /* Espacio entre los elementos */
+      gap: 10px;
       background-color: white;
       padding: 20px;
       border-radius: 40px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para dar relieve */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     /* Estilo de los inputs */
@@ -49,7 +91,6 @@
       border-color: #0078d4;
     }
 
-    /* Estilo del botón */
     button[type="submit"] {
       background-color: #0078d4;
       color: white;
@@ -65,27 +106,16 @@
       background-color: #0056b3;
     }
 
-    /* Estilo del selector */
     select {
       padding: 12px;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 40px;
-      width: 100px; /* Tamaño reducido */
+      width: 100px;
       outline: none;
       transition: border-color 0.3s ease;
       background-color: #f5f5f5;
-      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 viewBox%3D%220 0 24 24%22 fill%3D%22%23333%22%3E%3Cpath d%3D%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E'); /* Flecha personalizada */
-      background-repeat: no-repeat;
-      background-position: right 10px center; /* Mueve la flecha 15px desde la derecha */
-      background-size: 16px;
-      appearance: none; /* Oculta la flecha predeterminada del sistema */
-      -webkit-appearance: none;
-      -moz-appearance: none;
-    }
-
-    select:hover, input[type="text"]:hover {
-      border-color: #0078d4;
+      appearance: none;
     }
   </style>
 </head>
@@ -104,6 +134,8 @@
   <input type="text" name="q" placeholder="Buscar..." required />
   <button type="submit">Buscar</button>
 </form>
+
+
 
 
 <!-- Para el recuerdo:
