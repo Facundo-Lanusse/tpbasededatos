@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reseñas de Películas</title>
+</head>
+<body>
+<h1>Mis Reseñas de Películas</h1>
+<ul>
+    <% movies.forEach(movie => { %>
+        <li>
+            <strong><%= movie.title %></strong> - Puntuación: <%= movie.rating %> - Reseña: <%= movie.review %>
+            <!-- Botones para editar y eliminar la reseña -->
+            <form action="/movies/<%= movie.movie_user_id %>?_method=DELETE" method="POST" style="display:inline;">
+                <button type="submit">Eliminar Reseña</button>
+            </form>
+            <a href="/movies/edit/<%= movie.movie_user_id %>">Editar Reseña</a>
+        </li>
+    <% }); %>
+</ul>
+
+<h2>Agregar Reseña de Película</h2>
+<form action="/movies" method="POST">
+    <input type="text" name="movie_id" placeholder="ID de la película" required>
+    <input type="number" name="rating" placeholder="Puntuación (1-10)" min="1" max="10" required>
+    <textarea name="review" placeholder="Escribe una reseña..."></textarea>
+    <button type="submit">Agregar Reseña</button>
+</form>
+<a href="/">Volver al inicio</a>
+</body>
+</html>

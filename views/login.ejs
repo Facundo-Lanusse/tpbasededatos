@@ -119,29 +119,5 @@
         
         <p class="signup-link">¿No tienes una cuenta? <a href="/signup">Regístrate aquí</a>.</p>
     </form>
-
-    <script>
-        // Captura la respuesta del servidor y muestra el mensaje de error si existe
-        document.querySelector('form').addEventListener('submit', function (event) {
-            event.preventDefault(); // Evita que el formulario se envíe automáticamente
-            const formData = new FormData(this);
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', this.action);
-            xhr.onload = function () {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    // El servidor se encarga de redirigir, así que no necesitas manejar nada aquí
-                    window.location.href = xhr.responseURL; // Redirige a la URL que retorna el servidor
-                } else {
-                    // Mostrar el mensaje de error
-                    document.getElementById('error-message').textContent = xhr.responseText;
-                }
-            };
-            xhr.onerror = function () {
-                // Manejar errores de la solicitud
-                document.getElementById('error-message').textContent = "Error en la conexión. Inténtalo de nuevo.";
-            };
-            xhr.send(formData);
-        });
-    </script>
 </body>
 </html>

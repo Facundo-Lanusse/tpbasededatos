@@ -4,10 +4,6 @@
   <title>MovieWeb</title>
   
   <!-- Para mayor organización ponemos los botones login y register en el header -->
-  <header>    
-    <a href="/login" class="login-button">Iniciar sesión</a>
-    <a href="/signup" class="signup-button">Registrarse</a>
-</header>
   <style>
     /* Estilos generales */
     body {
@@ -37,7 +33,22 @@
       text-decoration: none;
       transition: background-color 0.3s ease;
     }
-
+    /*Boton de log out*/
+    .logout-button{
+      position: absolute;
+      top: 20px;
+      margin-right: auto;
+      right: 20px;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
     /* Botón de Log In */
     .login-button {
       position: absolute;
@@ -140,6 +151,15 @@
   </style>
 </head>
 <body>
+<header>
+  <% if (!isAuthenticated) { %>
+    <a href="/login" class="login-button">Iniciar sesión</a>
+    <a href="/signup" class="signup-button">Registrarse</a>
+  <% } else { %>
+      <!-- Mostrar solo si el usuario está autenticado -->
+    <a href="/logout" class="logout-button">Cerrar sesión</a>
+  <% } %>
+</header>
 <h1>MovieWeb</h1>
 <!-- Así se comenta, god-->
 <!-- En la main page ahora hay una caja en la cual podemos seleccionar que tipo buscar (película, actor o director) -->
@@ -154,20 +174,5 @@
   <input type="text" name="q" placeholder="Buscar..." required />
   <button type="submit">Buscar</button>
 </form>
-
-
-
-
-<!-- Para el recuerdo:
-
-<form action="/buscarActor" method="GET"> 
-  <input type="text" name="q" placeholder="Buscar actor..." />
-  <button type="submit">Buscar</button>
-</form>
-<form action="/buscarCrew" method="GET"> 
-  <input type="text" name="q" placeholder="Buscar crew..." />
-  <button type="submit">Buscar</button>
-</form>
--->
 </body>
 </html> 

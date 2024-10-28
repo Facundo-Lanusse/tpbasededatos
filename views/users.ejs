@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+</head>
+<body>
+<h1>Lista de Usuarios</h1>
+<ul>
+    <% users.forEach(user => { %>
+        <li>
+            <strong><%= user.user_name %></strong> - <%= user.user_username %> - <%= user.user_email %>
+            <!-- Botón para eliminar solo visible para administradores -->
+            <form action="/users/<%= user.user_id %>?_method=DELETE" method="POST" style="display:inline;">
+                <button type="submit">Eliminar</button>
+            </form>
+        </li>
+    <% }); %>
+</ul>
+<a href="/">Volver al inicio</a>
+</body>
+</html>

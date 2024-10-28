@@ -4,7 +4,15 @@ const ejs = require('ejs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const app = express();
+const session = require('express-session');
 const port = process.env.PORT || 3000;
+
+app.use(session({
+    secret: 'tu_clave_secreta', // Cambia esto a una cadena única y segura
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Cambia a true si usas HTTPS
+}));
 
 // Servir archivos estáticos desde el directorio "views"
 app.use(express.static('views'));
@@ -24,9 +32,28 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 user_username TEXT UNIQUE NOT NULL,
                 user_name TEXT NOT NULL,
                 user_email TEXT UNIQUE NOT NULL,
-                user_password TEXT NOT NULL
+                user_password TEXT NOT NULL,
+                is_admin INTEGER DEFAULT 0
             );
         `;
+        const createMovieUserTable = `
+            CREATE TABLE IF NOT EXISTS movie_user (
+            movie_user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            movie_id INTEGER NOT NULL,
+            rating INTEGER CHECK(rating >= 1 AND rating <= 10),
+            review TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            FOREIGN KEY (movie_id) REFERENCES movie(movie_id)
+            );
+        `;
+        db.run(createUserTable, (err) => {
+            if (err) {
+                console.error("Error creando la tabla de Movie_usuarios:", err);
+            } else {
+                console.log("Tabla de Movie_usuarios creada o ya existe.");
+            }
+        });
 
         db.run(createUserTable, (err) => {
             if (err) {
@@ -38,12 +65,70 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
+
 // Middleware para analizar el cuerpo de las solicitudes POST
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json()); // Para analizar solicitudes JSON si es necesario
 
+app.get('/', (req, res) => {
+    res.render('index', { isAuthenticated: !!req.session.user });
+});
+
+app.get('/login', (req, res) => {
+    res.render('login', { isAuthenticated: !!req.session.user });
+});
+
+app.get('/signup', (req, res) => {
+    res.render('signup', { isAuthenticated: !!req.session.user });
+});
+
+// Middleware para verificar si el usuario está autenticado
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+        next(); // Permitir acceso
+    } else {
+        res.status(401).send('Debe iniciar sesión para realizar esta acción.');
+    }
+}
+// Middleware para verificar si el usuario es administrador
+
+function isAdmin(req, res, next) {
+    // Simulación del usuario actual (esto debería implementarse con un sistema de autenticación real)
+    const currentUser = req.session.user || { is_admin: 0 }; // Obtener el usuario actual de la sesión
+
+    if (currentUser.is_admin) {
+        next(); // Permitir acceso
+    } else {
+        res.status(403).send('Acceso denegado. Se requieren permisos de administrador.');
+    }
+}
 // Configurar el motor de plantillas EJS
 app.set('view engine', 'ejs');
 
+// Listar usuarios (solo para administradores)
+app.get('/users', isAdmin, (req, res) => {
+    const getUsersQuery = `SELECT user_id, user_username, user_name, user_email FROM users`;
+    db.all(getUsersQuery, (err, rows) => {
+        if (err) {
+            console.error("Error al obtener la lista de usuarios:", err);
+            return res.status(500).send('Error al obtener la lista de usuarios.');
+        }
+        res.render('users', { users: rows });
+    });
+});
+
+// Eliminar usuario (solo para administradores)
+app.delete('/users/:id', isAdmin, (req, res) => {
+    const userId = req.params.id;
+    const deleteUserQuery = `DELETE FROM users WHERE user_id = ?`;
+    db.run(deleteUserQuery, [userId], (err) => {
+        if (err) {
+            console.error("Error al eliminar el usuario:", err);
+            return res.status(500).send('Error al eliminar el usuario.');
+        }
+        res.send('Usuario eliminado con éxito');
+    });
+});
 // Ruta para la página de registro
 app.get('/signup', (req, res) => {
     res.render('signup'); // Renderiza el formulario de registro
@@ -53,45 +138,45 @@ app.get('/signup', (req, res) => {
 app.post('/signup', (req, res) => {
     const { user_name, username, user_email, user_password } = req.body;
 
-    // Validar que los campos no estén vacíos
     if (!user_name || !username || !user_email || !user_password) {
         return res.status(400).send("Todos los campos son obligatorios.");
     }
 
-    // Verifica si el formato del correo electrónico es válido
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(user_email)) {
         return res.status(400).send("Correo electrónico no válido.");
     }
 
-    // Primero, verifica si el nombre de usuario o el correo electrónico ya existen
-    const checkUserQuery = `SELECT * FROM users WHERE user_username = ? OR user_email = ?`;
-    db.get(checkUserQuery, [username, user_email], (err, row) => {
+    const checkUserQuery = `SELECT COUNT(*) as count FROM users`;
+    db.get(checkUserQuery, [], (err, row) => {
         if (err) {
-            console.error("Error al verificar el usuario:", err);
+            console.error("Error al verificar el número de usuarios:", err);
             return res.status(500).send("Error al registrar el usuario.");
         }
-        if (row) {
-            // Si se encontró un usuario con el mismo nombre de usuario o correo electrónico
-            return res.status(400).send("El nombre de usuario o el correo electrónico ya existen.");
-        }
 
-        // Inserta los datos del usuario en la tabla de usuarios
+        const is_admin = row.count === 0 ? 1 : 0;
+
         const insertUserQuery = `
-            INSERT INTO users (user_name, user_username, user_email, user_password)
-            VALUES (?, ?, ?, ?);
+            INSERT INTO users (user_name, user_username, user_email, user_password, is_admin)
+            VALUES (?, ?, ?, ?, ?);
         `;
 
-        db.run(insertUserQuery, [user_name, username, user_email, user_password], function (err) {
+        db.run(insertUserQuery, [user_name, username, user_email, user_password, is_admin], function (err) {
             if (err) {
                 console.error("Error al registrar el usuario:", err);
                 return res.status(500).send("Error al registrar el usuario.");
             }
 
+            // Aquí es donde se produce el error
+            req.session.user = {
+                user_id: this.lastID,
+                user_name: user_name,
+                user_username: username,
+                is_admin: is_admin
+            };
+
             console.log("Usuario registrado exitosamente con user_id:", this.lastID);
-            // Redirigir a la página anterior
-            const referer = req.headers.referer || '/'; // Fallback a la raíz si no hay referer
-            res.redirect(referer); // Redirige a la página anterior
+            res.redirect('/login');
         });
     });
 });
@@ -105,31 +190,78 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    // Verificar si el nombre de usuario y la contraseña son correctos
     const checkUserQuery = `SELECT * FROM users WHERE user_username = ?`;
     db.get(checkUserQuery, [username], (err, row) => {
         if (err) {
             console.error("Error al verificar el usuario:", err);
             return res.status(500).send("Error al iniciar sesión.");
         }
-        if (!row) {
-            // Si no se encontró el usuario
+        if (!row || row.user_password !== password) {
             return res.status(401).send("Nombre de usuario o contraseña incorrectos.");
         }
 
-        // Aquí debes comparar las contraseñas
-        // Si usas texto plano, simplemente compara directamente
-        if (row.user_password !== password) {
-            return res.status(401).send("Nombre de usuario o contraseña incorrectos.");
-        }
+        req.session.user = {
+            user_id: row.user_id,
+            user_name: row.user_name,
+            user_username: row.user_username,
+            is_admin: row.is_admin
+        };
 
         console.log("Inicio de sesión exitoso para el usuario:", username);
-        // Redirigir a la página anterior
-        const referer = req.headers.referer || '/';
-        res.redirect(referer); // Redirige a la página anterior
+        res.redirect('/');
     });
 });
 
+
+// Asociar una película a un usuario autenticado con puntuación y reseña
+app.post('/movies', isAuthenticated, (req, res) => {
+    const userId = req.session.user.user_id;
+    const { movie_id, rating, review } = req.body;
+    const insertMovieUserQuery = `
+        INSERT INTO movie_user (user_id, movie_id, rating, review)
+        VALUES (?, ?, ?, ?);
+    `;
+    db.run(insertMovieUserQuery, [userId, movie_id, rating, review], (err) => {
+        if (err) {
+            console.error("Error al asociar la película con el usuario:", err);
+            return res.status(500).send('Error al asociar la película con el usuario.');
+        }
+        res.send('Película asociada con éxito');
+    });
+});
+
+// Actualizar reseña y puntuación de una película para el usuario autenticado
+app.put('/movies/:movieUserId', isAuthenticated, (req, res) => {
+    const userId = req.session.user.user_id;
+    const { movieUserId } = req.params;
+    const { rating, review } = req.body;
+    const updateMovieUserQuery = `
+        UPDATE movie_user
+        SET rating = ?, review = ?
+        WHERE movie_user_id = ? AND user_id = ?;
+    `;
+    db.run(updateMovieUserQuery, [rating, review, movieUserId, userId], (err) => {
+        if (err) {
+            console.error("Error al actualizar la reseña o puntuación:", err);
+            return res.status(500).send('Error al actualizar la reseña o puntuación.');
+        }
+        res.send('Reseña y puntuación actualizadas con éxito');
+    });
+});
+
+// Eliminar la reseña de una película para el usuario autenticado
+app.delete('/movies/:movieUserId', isAuthenticated, (req, res) => {
+    const userId = req.session.user.user_id;
+    const { movieUserId } = req.params;
+    const deleteMovieUserQuery = `DELETE FROM movie_user WHERE movie_user_id = ? AND user_id = ?`;
+    db.run(deleteMovieUserQuery, [movieUserId, userId], (err) => {
+        if (err) {
+            console.error("Error al eliminar la reseña de la película:", err);
+            return res.status(500).send('Error al eliminar la reseña de la película.');
+        }
+        res.send('Reseña eliminada con éxito');
+    });
+});
 
 // Ruta para la página de inicio
 app.get('/', (req, res) => {
@@ -431,6 +563,16 @@ app.get('/director/:id', (req, res) => {
 // Voy al login page
 app.get('/login', (req, res) => {
     res.render('login');
+});
+// Ruta para cerrar sesión
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Error al cerrar la sesión:", err);
+            return res.status(500).send("Error al cerrar la sesión.");
+        }
+        res.redirect('/login');
+    });
 });
 
 // Iniciar el servidor
