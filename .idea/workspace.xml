@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-<<<<<<< HEAD
     <list default="true" id="5bceb46f-e395-4dd0-bd81-9e2670061928" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
-=======
-    <list default="true" id="5bceb46f-e395-4dd0-bd81-9e2670061928" name="Changes" comment="" />
->>>>>>> 9681beb348e05d3a5c06c20c22922e0f5c661cb7
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -19,7 +15,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="ignaciogaspar" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -33,25 +29,6 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-<<<<<<< HEAD
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Node.js.app.js.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDatabaseViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;facu-lanusse&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;22.9.0&quot;,
-    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;22.7.9&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/nacug/Faculty/base-de-datos/tpbasededatos/movies.db&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-=======
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -60,19 +37,19 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "javascript.nodejs.core.library.configured.version": "22.9.0",
-    "javascript.nodejs.core.library.typings.version": "22.7.9",
-    "last_opened_file_path": "C:/Users/nacug/Faculty/base-de-datos/tpbasededatos/movies.db",
+    "javascript.nodejs.core.library.configured.version": "22.10.0",
+    "javascript.nodejs.core.library.typings.version": "22.8.1",
+    "last_opened_file_path": "C:/Users/nacug/Faculty/base-de-datos/tpbasededatos",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
+    "settings.editor.selected.configurable": "configurable.group.editor",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
->>>>>>> 9681beb348e05d3a5c06c20c22922e0f5c661cb7
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -90,12 +67,25 @@
       <updated>1729119205907</updated>
       <workItem from="1729119207092" duration="1645000" />
       <workItem from="1729370185769" duration="1282000" />
-      <workItem from="1729686672870" duration="3389000" />
-      <workItem from="1729696683908" duration="616000" />
+      <workItem from="1730053539483" duration="1459000" />
+      <workItem from="1730061133871" duration="2316000" />
     </task>
+    <task id="LOCAL-00001" summary="Agrego funcionalidades para el control de usuarios (poder listarlos y eliminarlos, las queries ya estan faltan los botones), arregle la opcion de logearse y agregue opcion para hacer log out.">
+      <option name="closed" value="true" />
+      <created>1730081045999</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1730081045999</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Agrego funcionalidades para el control de usuarios (poder listarlos y eliminarlos, las queries ya estan faltan los botones), arregle la opcion de logearse y agregue opcion para hacer log out." />
+    <option name="LAST_COMMIT_MESSAGE" value="Agrego funcionalidades para el control de usuarios (poder listarlos y eliminarlos, las queries ya estan faltan los botones), arregle la opcion de logearse y agregue opcion para hacer log out." />
   </component>
 </project>
