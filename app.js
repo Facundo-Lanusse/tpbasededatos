@@ -121,7 +121,7 @@ app.get('/users', isAdmin, (req, res) => {
 });
 
 // Eliminar usuario (solo para administradores)
-app.delete('/users/:id', isAdmin, (req, res) => {
+app.post('/users/:id/delete', isAdmin, (req, res) => {
     const userId = req.params.id;
     const deleteUserQuery = `DELETE FROM users WHERE user_id = ?`;
     db.run(deleteUserQuery, [userId], (err) => {
@@ -129,7 +129,7 @@ app.delete('/users/:id', isAdmin, (req, res) => {
             console.error("Error al eliminar el usuario:", err);
             return res.status(500).send('Error al eliminar el usuario.');
         }
-        res.send('Usuario eliminado con éxito');
+        res.redirect('/users?message=Usuario eliminado con éxito');
     });
 });
 // Ruta para la página de registro

@@ -89,7 +89,7 @@
         <li>
             <strong><%= user.user_name %></strong> - <%= user.user_username %> - <%= user.user_email %>
             <!-- Botón para eliminar solo visible para administradores -->
-            <form action="/users/<%= user.user_id %>?_method=DELETE" method="POST" style="display:inline;">
+            <form action="/users/<%= user.user_id %>/delete" method="POST" style="display:inline;">
                 <button type="submit">Eliminar</button>
             </form>
         </li>
