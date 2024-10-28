@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5bceb46f-e395-4dd0-bd81-9e2670061928" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/movies.db" beforeDir="false" afterPath="$PROJECT_DIR$/movies.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,7 +16,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="ignaciogaspar" />
+        <entry key="$PROJECT_DIR$" value="facu-lanusse" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -45,15 +46,33 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "npm.test.executor": "Run",
     "settings.editor.selected.configurable": "configurable.group.editor",
     "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RunManager">
+    <configuration name="test" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.test" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23339.15" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
       </set>
     </attachedChunks>
   </component>
@@ -69,6 +88,7 @@
       <workItem from="1729370185769" duration="1282000" />
       <workItem from="1730053539483" duration="1459000" />
       <workItem from="1730061133871" duration="2316000" />
+      <workItem from="1730081498745" duration="337000" />
     </task>
     <task id="LOCAL-00001" summary="Agrego funcionalidades para el control de usuarios (poder listarlos y eliminarlos, las queries ya estan faltan los botones), arregle la opcion de logearse y agregue opcion para hacer log out.">
       <option name="closed" value="true" />
