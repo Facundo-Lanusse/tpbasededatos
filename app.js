@@ -71,7 +71,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()); // Para analizar solicitudes JSON si es necesario
 
 app.get('/', (req, res) => {
-    res.render('index', { isAuthenticated: !!req.session.user });
+    const isAuthenticated = req.session.user !== undefined;
+    const isAdmin = req.session.user && req.session.user.is_admin === 1;
+
+    res.render('index', { isAuthenticated, isAdmin});
 });
 
 app.get('/login', (req, res) => {
