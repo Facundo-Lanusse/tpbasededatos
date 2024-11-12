@@ -71,7 +71,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()); // Para analizar solicitudes JSON si es necesario
 
 app.get('/', (req, res) => {
-    res.render('index', { isAuthenticated: !!req.session.user });
+    const isAuthenticated = req.session.user !== undefined;
+    const isAdmin = req.session.user && req.session.user.is_admin === 1;
+
+    res.render('index', { isAuthenticated, isAdmin});
 });
 
 app.get('/login', (req, res) => {
@@ -118,7 +121,7 @@ app.get('/users', isAdmin, (req, res) => {
 });
 
 // Eliminar usuario (solo para administradores)
-app.delete('/users/:id', isAdmin, (req, res) => {
+app.post('/users/:id/delete', isAdmin, (req, res) => {
     const userId = req.params.id;
     const deleteUserQuery = `DELETE FROM users WHERE user_id = ?`;
     db.run(deleteUserQuery, [userId], (err) => {
@@ -126,7 +129,7 @@ app.delete('/users/:id', isAdmin, (req, res) => {
             console.error("Error al eliminar el usuario:", err);
             return res.status(500).send('Error al eliminar el usuario.');
         }
-        res.send('Usuario eliminado con éxito');
+        res.redirect('/users?message=Usuario eliminado con éxito');
     });
 });
 // Ruta para la página de registro
