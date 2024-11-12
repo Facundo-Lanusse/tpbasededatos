@@ -65,6 +65,21 @@
       transition: background-color 0.3s ease;
     }
 
+    .list-users {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
     .login-button:hover{
       background-color: #0056b3;
     }
@@ -148,6 +163,14 @@
     select:hover {
       border-color: #0078d4;
     }
+    .greeting {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 16px;
+        color: #333;
+    }
+
   </style>
 </head>
 <body>
@@ -155,6 +178,10 @@
   <% if (!isAuthenticated) { %>
     <a href="/login" class="login-button">Iniciar sesión</a>
     <a href="/signup" class="signup-button">Registrarse</a>
+  <% } else if (isAdmin) { %>
+          <!-- Mostrar solo si el usuario es admin -->
+          <a href="/users" class="list-users">Lista de usuario</a>
+          <a href="/logout" class="logout-button">Cerrar sesión</a>
   <% } else { %>
       <!-- Mostrar solo si el usuario está autenticado -->
     <a href="/logout" class="logout-button">Cerrar sesión</a>
