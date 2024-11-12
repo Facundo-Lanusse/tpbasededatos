@@ -14,6 +14,12 @@ app.use(session({
     cookie: { secure: false } // Cambia a true si usas HTTPS
 }));
 
+// Middleware para pasar el usuario a todas las vistas
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null; // Esto hace que `user` esté disponible en todas las vistas
+    next();
+});
+
 // Servir archivos estáticos desde el directorio "views"
 app.use(express.static('views'));
 
@@ -47,7 +53,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
             FOREIGN KEY (movie_id) REFERENCES movie(movie_id)
             );
         `;
-        db.run(createUserTable, (err) => {
+        db.run(createMovieUserTable, (err) => {
             if (err) {
                 console.error("Error creando la tabla de Movie_usuarios:", err);
             } else {
@@ -271,7 +277,6 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-// Búsqueda de películas, actores, directores y palabras clave
 // Búsqueda de películas, actores, directores, palabras clave y todo
 app.get('/buscar', (req, res) => {
     const searchTerm = req.query.q;
@@ -370,6 +375,18 @@ app.get('/buscar', (req, res) => {
 app.get('/pelicula/:id', (req, res) => {
     const movieId = req.params.id;
     const movieQuery = `SELECT * FROM movie WHERE movie_id = ?`;
+    const commentsQuery = `
+    SELECT u.user_name, mu.rating, mu.review
+    FROM movie_user mu
+    JOIN users u ON mu.user_id = u.user_id
+    WHERE mu.movie_id = ?
+    ORDER BY mu.movie_user_id DESC
+`;
+const averageRatingQuery = `
+    SELECT AVG(mu.rating) AS average_rating
+    FROM movie_user mu
+    WHERE mu.movie_id = ?
+`;
     const castQuery = `
         SELECT actor.person_name AS actor_name, actor.person_id AS actor_id, movie_cast.character_name, movie_cast.cast_order
         FROM movie_cast 
@@ -468,12 +485,10 @@ app.get('/pelicula/:id', (req, res) => {
                             }
                         });
                     } else if (target === 'company_name') {
-                        // Asegurarse de que se procesen correctamente las compañías
                         rows.forEach(row => {
                             movieData.company_name.push(row.company_name);
                         });
                     } else if (target === 'countries') {
-                        // Asegurarse de que se procesen correctamente los países
                         rows.forEach(row => {
                             movieData.countries.push(row.country_name);
                         });
@@ -485,7 +500,29 @@ app.get('/pelicula/:id', (req, res) => {
 
                 completedQueries++;
                 if (completedQueries === queries.length) {
-                    res.render('pelicula', {movie: movieData});
+                   // Ejecutar la consulta para obtener el puntaje promedio
+                    db.get(averageRatingQuery, [movieId], (err, avgRatingRow) => {
+                        if (err) {
+                            console.error("Error al cargar el puntaje promedio:", err);
+                            return res.status(500).send("Error al cargar el puntaje promedio.");
+                        }
+
+                        // Asignar el puntaje promedio a la variable movieData
+                        const averageRating = avgRatingRow ? avgRatingRow.average_rating : null;
+
+                        // Añadir la información de puntajes a movieData
+                        movieData.average_rating = averageRating;
+
+                        // Ahora, continuar con la carga de comentarios y renderizar la vista
+                        db.all(commentsQuery, [movieId], (err, comments) => {
+                            if (err) {
+                                console.error("Error al cargar los comentarios:", err);
+                                return res.status(500).send("Error al cargar los comentarios.");
+                            }
+                            
+                            res.render('pelicula', { movie: movieData, comments });
+                        });
+                    });
                 }
             });
         });
