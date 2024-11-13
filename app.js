@@ -88,7 +88,7 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup', { isAuthenticated: !!req.session.user });
+    res.render('signup', { isAuthenticated: !!req.session.user});
 });
 
 // Middleware para verificar si el usuario está autenticado
@@ -117,12 +117,14 @@ app.set('view engine', 'ejs');
 // Listar usuarios (solo para administradores)
 app.get('/users', isAdmin, (req, res) => {
     const getUsersQuery = `SELECT user_id, user_username, user_name, user_email FROM users`;
+    const successMessage = req.session.successMessage;
+    delete req.session.successMessage;  // Limpiar el mensaje de la sesión
     db.all(getUsersQuery, (err, rows) => {
         if (err) {
             console.error("Error al obtener la lista de usuarios:", err);
             return res.status(500).send('Error al obtener la lista de usuarios.');
         }
-        res.render('users', { users: rows });
+        res.render('users', { users: rows , successMessage});
     });
 });
 
@@ -135,17 +137,15 @@ app.post('/users/:id/delete', isAdmin, (req, res) => {
             console.error("Error al eliminar el usuario:", err);
             return res.status(500).send('Error al eliminar el usuario.');
         }
+        req.session.successMessage = "Usuario eliminado exitosamente";
         res.redirect('/users?message=Usuario eliminado con éxito');
     });
-});
-// Ruta para la página de registro
-app.get('/signup', (req, res) => {
-    res.render('signup'); // Renderiza el formulario de registro
 });
 
 // Ruta para manejar el registro de usuarios
 app.post('/signup', (req, res) => {
     const { user_name, username, user_email, user_password } = req.body;
+    // Limpiar el mensaje de la sesión
 
     if (!user_name || !username || !user_email || !user_password) {
         return res.status(400).send("Todos los campos son obligatorios.");
@@ -159,7 +159,6 @@ app.post('/signup', (req, res) => {
     const checkUserQuery = `SELECT COUNT(*) as count FROM users`;
     db.get(checkUserQuery, [], (err, row) => {
         if (err) {
-            console.error("Error al verificar el número de usuarios:", err);
             return res.status(500).send("Error al registrar el usuario.");
         }
 
@@ -172,7 +171,6 @@ app.post('/signup', (req, res) => {
 
         db.run(insertUserQuery, [user_name, username, user_email, user_password, is_admin], function (err) {
             if (err) {
-                console.error("Error al registrar el usuario:", err);
                 return res.status(500).send("Error al registrar el usuario.");
             }
 
@@ -188,11 +186,6 @@ app.post('/signup', (req, res) => {
             res.redirect('/login');
         });
     });
-});
-
-// Ruta para la página de inicio de sesión
-app.get('/login', (req, res) => {
-    res.render('login'); // Renderiza el formulario de inicio de sesión
 });
 
 // Ruta para manejar el inicio de sesión
@@ -235,7 +228,9 @@ app.post('/movies', isAuthenticated, (req, res) => {
             console.error("Error al asociar la película con el usuario:", err);
             return res.status(500).send('Error al asociar la película con el usuario.');
         }
-        res.send('Película asociada con éxito');
+        // Guardar el mensaje de éxito en la sesión
+        req.session.successMessage = "Comentario agregado exitosamente";
+        res.redirect(`/pelicula/${movie_id}`);
     });
 });
 
@@ -374,37 +369,47 @@ app.get('/buscar', (req, res) => {
 // Ruta para la página de datos de una película particular
 app.get('/pelicula/:id', (req, res) => {
     const movieId = req.params.id;
+    const successMessage = req.session.successMessage;
+    delete req.session.successMessage;  // Limpiar el mensaje de la sesión
+
+    // Consulta principal para obtener los detalles básicos de la película
     const movieQuery = `SELECT * FROM movie WHERE movie_id = ?`;
     const commentsQuery = `
-    SELECT u.user_name, mu.rating, mu.review
-    FROM movie_user mu
-    JOIN users u ON mu.user_id = u.user_id
-    WHERE mu.movie_id = ?
-    ORDER BY mu.movie_user_id DESC
-`;
-const averageRatingQuery = `
-    SELECT AVG(mu.rating) AS average_rating
-    FROM movie_user mu
-    WHERE mu.movie_id = ?
-`;
+        SELECT u.user_name, mu.rating, mu.review
+        FROM movie_user mu
+        JOIN users u ON mu.user_id = u.user_id
+        WHERE mu.movie_id = ?
+        ORDER BY mu.movie_user_id DESC
+    `;
+    const averageRatingQuery = `
+        SELECT AVG(mu.rating) AS average_rating
+        FROM movie_user mu
+        WHERE mu.movie_id = ?
+    `;
+
     const castQuery = `
         SELECT actor.person_name AS actor_name, actor.person_id AS actor_id, movie_cast.character_name, movie_cast.cast_order
         FROM movie_cast 
         LEFT JOIN person AS actor ON movie_cast.person_id = actor.person_id
-        WHERE movie_cast.movie_id = ?`;
+        WHERE movie_cast.movie_id = ?
+    `;
+
     const crewQuery = `
         SELECT crew_member.person_name AS crew_member_name, crew_member.person_id AS crew_member_id, department.department_name, movie_crew.job
         FROM movie_crew 
         LEFT JOIN department ON movie_crew.department_id = department.department_id
         LEFT JOIN person AS crew_member ON crew_member.person_id = movie_crew.person_id
-        WHERE movie_crew.movie_id = ?`;
+        WHERE movie_crew.movie_id = ?
+    `;
+
     const genreQuery = `SELECT genre.genre_name FROM movie_genres LEFT JOIN genre ON movie_genres.genre_id = genre.genre_id WHERE movie_genres.movie_id = ?`;
     const productionCompanyQuery = `
-    SELECT production_company.company_name AS company_name
-    FROM movie_company
-    LEFT JOIN production_company ON movie_company.company_id = production_company.company_id
-    WHERE movie_company.movie_id = ?;
-`;
+        SELECT production_company.company_name AS company_name
+        FROM movie_company
+        LEFT JOIN production_company ON movie_company.company_id = production_company.company_id
+        WHERE movie_company.movie_id = ?;
+    `;
+
     const languageQuery = `SELECT language.language_name FROM movie_languages LEFT JOIN language ON movie_languages.language_id = language.language_id WHERE movie_languages.movie_id = ?`;
     const countryQuery = `SELECT country.country_name FROM production_country LEFT JOIN country ON production_country.country_id = country.country_id WHERE production_country.movie_id = ?`;
     const keywordQuery = `SELECT keyword.keyword_name FROM movie_keywords LEFT JOIN keyword ON movie_keywords.keyword_id = keyword.keyword_id WHERE movie_keywords.movie_id = ?`;
@@ -435,7 +440,7 @@ const averageRatingQuery = `
             keywords: []
         };
 
-        // Ejecutar las consultas restantes
+        // Ejecutar las consultas adicionales en paralelo
         const queries = [
             {query: castQuery, target: 'cast'},
             {query: crewQuery, target: 'crew'},
@@ -448,7 +453,7 @@ const averageRatingQuery = `
 
         let completedQueries = 0;
 
-        // Ejecutar todas las consultas en paralelo
+        // Ejecutar todas las consultas en paralelo y completar movieData
         queries.forEach(({query, target}) => {
             db.all(query, [movieId], (err, rows) => {
                 if (err) {
@@ -500,7 +505,7 @@ const averageRatingQuery = `
 
                 completedQueries++;
                 if (completedQueries === queries.length) {
-                   // Ejecutar la consulta para obtener el puntaje promedio
+                    // Ejecutar la consulta para obtener el puntaje promedio
                     db.get(averageRatingQuery, [movieId], (err, avgRatingRow) => {
                         if (err) {
                             console.error("Error al cargar el puntaje promedio:", err);
@@ -509,18 +514,17 @@ const averageRatingQuery = `
 
                         // Asignar el puntaje promedio a la variable movieData
                         const averageRating = avgRatingRow ? avgRatingRow.average_rating : null;
-
-                        // Añadir la información de puntajes a movieData
                         movieData.average_rating = averageRating;
 
-                        // Ahora, continuar con la carga de comentarios y renderizar la vista
+                        // Ejecutar la consulta para obtener los comentarios
                         db.all(commentsQuery, [movieId], (err, comments) => {
                             if (err) {
                                 console.error("Error al cargar los comentarios:", err);
                                 return res.status(500).send("Error al cargar los comentarios.");
                             }
-                            
-                            res.render('pelicula', { movie: movieData, comments });
+
+                            // Renderizar la vista con movieData y los comentarios
+                            res.render('pelicula', { movie: movieData, comments, successMessage });
                         });
                     });
                 }
