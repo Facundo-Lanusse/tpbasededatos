@@ -282,6 +282,16 @@
       margin: 10px 0 20px;
     }
 
+    .success-message {
+        background-color: #edfbd8;
+        color: #2b641e;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: solid 1px #84d65a;
+        border-radius: 4px;
+        text-align: center;
+    }
+
     li {
       font-size: 18px;
       color: #555555;
@@ -396,6 +406,11 @@
     </a>
 </header>
 <div class="container">
+        <% if (successMessage) { %>
+            <div class="success-message">
+                <%= successMessage %>
+            </div>
+        <% } %>
   <h1><%= movie.title %></h1>
   <h3>Fecha: <%= movie.release_date %></h3>
   <h3>Puntaje Promedio: <%= movie.average_rating ? movie.average_rating.toFixed(2) : 'Sin calificación' %></h3>
