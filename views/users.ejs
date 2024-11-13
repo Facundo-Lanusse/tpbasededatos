@@ -73,6 +73,15 @@
     form:hover{
         scale: 1.1;
     }
+    .success-message {
+        background-color: #fef2f2;
+        color: brown;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #f87171;
+        border-radius: 4px;
+        text-align: center;
+    }
 
 
 </style>
@@ -83,6 +92,12 @@
     <title>Usuarios</title>
 </head>
 <body>
+<div class="container">
+    <% if (successMessage) { %>
+        <div class="success-message">
+            <%= successMessage %>
+        </div>
+    <% } %>
 <h1>Lista de Usuarios</h1>
 <ul>
     <% users.forEach(user => { %>
