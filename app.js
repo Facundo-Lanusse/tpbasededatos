@@ -49,7 +49,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
             movie_id INTEGER NOT NULL,
             rating INTEGER CHECK(rating >= 1 AND rating <= 10),
             review TEXT,
-            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
             FOREIGN KEY (movie_id) REFERENCES movie(movie_id)
             );
         `;
@@ -140,14 +140,26 @@ app.get('/users', isAdmin, (req, res) => {
 // Eliminar usuario (solo para administradores)
 app.post('/users/:id/delete', isAdmin, (req, res) => {
     const userId = req.params.id;
-    const deleteUserQuery = `DELETE FROM users WHERE user_id = ?`;
-    db.run(deleteUserQuery, [userId], (err) => {
+
+    // Primero, elimina todas las reseñas del usuario en movie_user
+    const deleteReviewsQuery = `DELETE FROM movie_user WHERE user_id = ?`;
+    db.run(deleteReviewsQuery, [userId], (err) => {
         if (err) {
-            console.error("Error al eliminar el usuario:", err);
-            return res.status(500).send('Error al eliminar el usuario.');
+            console.error("Error al eliminar las reseñas del usuario:", err);
+            return res.status(500).send('Error al eliminar las reseñas del usuario.');
         }
-        req.session.successMessage = "Usuario eliminado exitosamente";
-        res.redirect('/users?message=Usuario eliminado con éxito');
+
+        // Luego, elimina el usuario de la tabla users
+        const deleteUserQuery = `DELETE FROM users WHERE user_id = ?`;
+        db.run(deleteUserQuery, [userId], (err) => {
+            if (err) {
+                console.error("Error al eliminar el usuario:", err);
+                return res.status(500).send('Error al eliminar el usuario.');
+            }
+
+            req.session.successMessage = "Usuario y sus reseñas eliminados exitosamente";
+            res.redirect('/users?message=Usuario eliminado con éxito');
+        });
     });
 });
 
@@ -493,8 +505,7 @@ app.get('/pelicula/:id', (req, res) => {
                         }
 
                         // Asignar el puntaje promedio a la variable movieData
-                        const averageRating = avgRatingRow ? avgRatingRow.average_rating : null;
-                        movieData.average_rating = averageRating;
+                        movieData.average_rating = avgRatingRow ? avgRatingRow.average_rating : null;
 
                         // Ejecutar la consulta para obtener los comentarios
                         db.all(commentsQuery, [movieId], (err, comments) => {
