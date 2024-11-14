@@ -625,7 +625,6 @@
             },
             body: JSON.stringify({
                 movie_id: movieId,
-                userId: <%= user.user_id %>
             })
         }).then(response => {
             if (response.ok) {
