@@ -107,8 +107,8 @@
 
         /* Botón de regreso */
         .back-button {
-            display: inline-block;
-            margin-top: 1.5em;
+            display: block;
+            margin: 1.5em auto 0 auto;
             padding: 0.8em 1.5em;
             background: #0078d4;
             color: #fff;
@@ -117,6 +117,7 @@
             font-weight: bold;
             transition: background 0.3s;
             text-align: center;
+            max-width: 250px;
         }
         .back-button:hover {
             background: #0056b3;
@@ -148,8 +149,9 @@
     <% } else { %>
         <p>Este usuario no ha realizado ninguna reseña.</p>
     <% } %>
-
-    <a href="/users" class="back-button">← Volver a la lista de usuarios</a>
+    <% if (isAdmin){ %>
+        <a href="/users" class="back-button">← Volver a la lista de usuarios</a>
+    <% } %>
 </div>
 </body>
 </html>

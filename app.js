@@ -241,7 +241,7 @@ app.post('/login', (req, res) => {
 });
 
 // Ruta para mostrar el perfil de un usuario específico, solo accesible para administradores
-app.get('/users/:id/profile', isAdmin, (req, res) => {
+app.get('/users/:id/profile', isAuthenticated , (req, res) => {
     const userId = req.params.id;
 
     // Consulta para obtener las reseñas del usuario junto con los títulos de las películas
@@ -257,6 +257,7 @@ app.get('/users/:id/profile', isAdmin, (req, res) => {
 
     // Ejecutar ambas consultas en paralelo
     db.get(userQuery, [userId], (err, user) => {
+        const isAdmin = req.session.user && req.session.user.is_admin === 1;
         if (err) {
             console.error("Error al obtener los datos del usuario:", err);
             return res.status(500).send('Error al obtener los datos del usuario.');
@@ -272,7 +273,7 @@ app.get('/users/:id/profile', isAdmin, (req, res) => {
             }
 
             // Renderizar la vista de perfil con los datos del usuario y sus reseñas
-            res.render('user_profile', { user, reviews });
+            res.render('user_profile', { user, reviews, isAdmin });
         });
     });
 });

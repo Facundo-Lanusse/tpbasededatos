@@ -187,7 +187,8 @@
             <a href="/users" class="menu">Lista de usuario</a>
             <a href="/logout" class="menu">Cerrar sesión</a>
         <% } else { %>
-            <a href="/logout" class="menu">Cerrar sesión</a>
+                <a href="/users/<%= user.user_id %>/profile" class="menu">Mis reseñas</a>
+                <a href="/logout" class="menu">Cerrar sesión</a>
         <% } %>
     </div>
 </header>
