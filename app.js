@@ -84,11 +84,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-    res.render('login', { isAuthenticated: !!req.session.user });
+    // Pasar el mensaje de error, si existe, y luego eliminarlo de la sesión
+    const errorMessage = req.session.errorMessage;
+    delete req.session.errorMessage;
+
+    res.render('login', {
+        isAuthenticated: !!req.session.user,
+        errorMessage // Pasamos el mensaje de error a la vista
+    });
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup', { isAuthenticated: !!req.session.user});
+    const errorMessage = req.session.errorMessage;
+    delete req.session.errorMessage;
+    res.render('signup', { isAuthenticated: !!req.session.user, errorMessage});
 });
 
 // Middleware para verificar si el usuario está autenticado
@@ -159,7 +168,9 @@ app.post('/signup', (req, res) => {
     const checkUserQuery = `SELECT COUNT(*) as count FROM users`;
     db.get(checkUserQuery, [], (err, row) => {
         if (err) {
-            return res.status(500).send("Error al registrar el usuario.");
+            console.error("Error al verificar el usuario:", err);
+            req.session.errorMessage = "Error al registrarse: Nombre de usuario o mail ya existente";
+            return res.redirect('/signup');
         }
 
         const is_admin = row.count === 0 ? 1 : 0;
@@ -171,7 +182,9 @@ app.post('/signup', (req, res) => {
 
         db.run(insertUserQuery, [user_name, username, user_email, user_password, is_admin], function (err) {
             if (err) {
-                return res.status(500).send("Error al registrar el usuario.");
+                console.error("Error al verificar el usuario:", err);
+                req.session.errorMessage = "Error al registrarse: Nombre de usuario o Mail ya existente";
+                return res.redirect('/signup');
             }
 
             // Aquí es donde se produce el error
@@ -196,12 +209,13 @@ app.post('/login', (req, res) => {
     db.get(checkUserQuery, [username], (err, row) => {
         if (err) {
             console.error("Error al verificar el usuario:", err);
-            return res.status(500).send("Error al iniciar sesión.");
+            req.session.errorMessage = "Error al iniciar sesión.";
+            return res.redirect('/login');
         }
         if (!row || row.user_password !== password) {
-            return res.status(401).send("Nombre de usuario o contraseña incorrectos.");
+            req.session.errorMessage = "Nombre de usuario o contraseña incorrectos.";
+            return res.redirect('/login');
         }
-
         req.session.user = {
             user_id: row.user_id,
             user_name: row.user_name,
@@ -233,40 +247,6 @@ app.post('/movies', isAuthenticated, (req, res) => {
         res.redirect(`/pelicula/${movie_id}`);
     });
 });
-
-// Actualizar reseña y puntuación de una película para el usuario autenticado
-app.put('/movies/:movieUserId', isAuthenticated, (req, res) => {
-    const userId = req.session.user.user_id;
-    const { movieUserId } = req.params;
-    const { rating, review } = req.body;
-    const updateMovieUserQuery = `
-        UPDATE movie_user
-        SET rating = ?, review = ?
-        WHERE movie_user_id = ? AND user_id = ?;
-    `;
-    db.run(updateMovieUserQuery, [rating, review, movieUserId, userId], (err) => {
-        if (err) {
-            console.error("Error al actualizar la reseña o puntuación:", err);
-            return res.status(500).send('Error al actualizar la reseña o puntuación.');
-        }
-        res.send('Reseña y puntuación actualizadas con éxito');
-    });
-});
-
-// Eliminar la reseña de una película para el usuario autenticado
-app.delete('/movies/:movieUserId', isAuthenticated, (req, res) => {
-    const userId = req.session.user.user_id;
-    const { movieUserId } = req.params;
-    const deleteMovieUserQuery = `DELETE FROM movie_user WHERE movie_user_id = ? AND user_id = ?`;
-    db.run(deleteMovieUserQuery, [movieUserId, userId], (err) => {
-        if (err) {
-            console.error("Error al eliminar la reseña de la película:", err);
-            return res.status(500).send('Error al eliminar la reseña de la película.');
-        }
-        res.send('Reseña eliminada con éxito');
-    });
-});
-
 // Ruta para la página de inicio
 app.get('/', (req, res) => {
     res.render('index');
