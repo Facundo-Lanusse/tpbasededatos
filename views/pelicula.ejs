@@ -396,8 +396,74 @@
     .star-rating label:hover ~ label {
         color: #FFD700;
     }
+    /* From Uiverse.io by barisdogansutcu */
+    label.container {
+        background-color: white;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 15px 10px 10px;
+        cursor: pointer;
+        user-select: none;
+        border-radius: 10px;
+        box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+        color: black;
+        max-width: 175px;
+    }
 
-  </style>
+    input[name="favorite-checkbox"] {
+        display: none;
+    }
+
+    input[name="favorite-checkbox"]:checked + label svg {
+        fill: hsl(0deg 100% 50%);
+        stroke: hsl(0deg 100% 50%);
+        animation: heartButton 1s;
+    }
+
+    @keyframes heartButton {
+        0% { transform: scale(1); }
+        25% { transform: scale(1.3); }
+        50% { transform: scale(1); }
+        75% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
+    input[name="favorite-checkbox"] + label .action {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+    }
+
+    input[name="favorite-checkbox"] + label .action span {
+        grid-column-start: 1;
+        grid-column-end: 1;
+        grid-row-start: 1;
+        grid-row-end: 1;
+        transition: all .5s;
+    }
+
+    input[name="favorite-checkbox"] + label .action span.option-1 {
+        transform: translate(0px,0%);
+        opacity: 1;
+    }
+
+    input[name="favorite-checkbox"]:checked + label .action span.option-1 {
+        transform: translate(0px,-100%);
+        opacity: 0;
+    }
+
+    input[name="favorite-checkbox"] + label .action span.option-2 {
+        transform: translate(0px,100%);
+        opacity: 0;
+    }
+
+    input[name="favorite-checkbox"]:checked + label .action span.option-2 {
+        transform: translate(0px,0%);
+        opacity: 1;
+    }
+
+    </style>
 </head>
 <body>
   <header>
@@ -412,9 +478,31 @@
             </div>
         <% } %>
   <h1><%= movie.title %></h1>
+            <!-- Botón de favoritos dinámico -->
+            <div class="favorite-section">
+                <% if (user) { %> <!-- Mostrar solo si user está autenticado -->
+                <input type="checkbox" id="favorite"
+                       name="favorite-checkbox"
+                       value="favorite-button"
+                        <%= isFavorite ? 'checked' : '' %>
+                       onclick="toggleFavorite(<%= movie.id %>)">
+
+                <label for="favorite" class="container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <div class="action">
+                        <span class="option-1">Add to Favorites</span>
+                        <span class="option-2">Added to Favorites</span>
+                    </div>
+                </label>
+                <% } else { %>
+                    <p><a href="/login">Inicia sesión</a> para agregar o quitar de favoritos.</p>
+                <% } %>
+            </div>
   <h3>Fecha: <%= movie.release_date %></h3>
   <h3>Puntaje Promedio: <%= movie.average_rating ? movie.average_rating.toFixed(2) : 'Sin calificación' %></h3>
-  <div class="review-section">
+            <div class="review-section">
     <% if (user) { %>
       <h3>Deja tu puntuación y comentario</h3>
       <form action="/movies" method="POST" class="review-form">
@@ -525,4 +613,29 @@
   <div id="inicio"><a href="/">Inicio</a></div>
 </div>
 </body>
+<script>
+    function toggleFavorite(movieId) {
+        const isFavorite = document.getElementById('favorite').checked;
+        const url = isFavorite ? '/favorites/add' : '/favorites/remove';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                movie_id: movieId,
+                userId: <%= user.user_id %>
+            })
+        }).then(response => {
+            if (response.ok) {
+                console.log(isFavorite ? 'Agregado a favoritos' : 'Eliminado de favoritos');
+            } else {
+                console.error('Error al cambiar el estado de favorito');
+            }
+        }).catch(error => {
+            console.error('Error de red:', error);
+        });
+    }
+</script>
 </html>

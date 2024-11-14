@@ -184,10 +184,10 @@
             <a href="/login" class="menu">Iniciar sesión</a>
             <a href="/signup" class="menu">Registrarse</a>
         <% } else if (isAdmin) { %>
-            <a href="/users" class="menu">Lista de usuario</a>
+            <a href="/users" class="menu">Lista de usuarios</a>
             <a href="/logout" class="menu">Cerrar sesión</a>
         <% } else { %>
-                <a href="/users/<%= user.user_id %>/profile" class="menu">Mis reseñas</a>
+                <a href="/users/<%= user.user_id %>/profile" class="menu">Mi perfil</a>
                 <a href="/logout" class="menu">Cerrar sesión</a>
         <% } %>
     </div>

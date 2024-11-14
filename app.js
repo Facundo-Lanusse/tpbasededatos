@@ -53,6 +53,22 @@ const db = new sqlite3.Database(dbPath, (err) => {
             FOREIGN KEY (movie_id) REFERENCES movie(movie_id)
             );
         `;
+        const createMovieUserFavoritesTable = `
+            CREATE TABLE IF NOT EXISTS movie_user_favorites (
+            movie_user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            movie_id INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (movie_id) REFERENCES movie(movie_id)
+            );
+        `;
+        db.run(createMovieUserFavoritesTable, (err) => {
+            if (err) {
+                console.error("Error creando la tabla de Movie_usuarios_favorites:", err);
+            } else {
+                console.log("Tabla de Movie_usuarios_favorites creada o ya existe.");
+            }
+        });
         db.run(createMovieUserTable, (err) => {
             if (err) {
                 console.error("Error creando la tabla de Movie_usuarios:", err);
@@ -240,40 +256,107 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Ruta para mostrar el perfil de un usuario específico, solo accesible para administradores
-app.get('/users/:id/profile', isAuthenticated , (req, res) => {
+// Ruta para agregar una película a favoritos, evitando duplicados
+app.post('/favorites/add', (req, res) => {
+    const movie_id = req.body.movie_id;
+    const userId = req.session.user.user_id;
+
+    const checkFavoriteQuery = `
+        SELECT * FROM movie_user_favorites
+        WHERE user_id = ? AND movie_id = ?
+    `;
+
+    db.get(checkFavoriteQuery, [userId, movie_id], (err, row) => {
+        if (err) return res.status(500).send("Error al verificar favoritos.");
+
+        if (row) {
+            return res.redirect(`/pelicula/${movie_id}?successMessage=La película ya está en tus favoritos`);
+        }
+
+        const addFavoriteQuery = `
+            INSERT INTO movie_user_favorites (user_id, movie_id)
+            VALUES (?, ?)
+        `;
+
+        db.run(addFavoriteQuery, [userId, movie_id], (err) => {
+            if (err) return res.status(500).send("Error al agregar a favoritos.");
+
+            res.redirect(`/pelicula/${movie_id}?successMessage=Película agregada a favoritos`);
+        });
+    });
+});
+
+// Ruta para eliminar una película de favoritos
+app.post('/favorites/remove', (req, res) => {
+    const movie_id = req.body.movie_id;
+    const userId = req.session.user.user_id;
+
+    const removeFavoriteQuery = `
+        DELETE FROM movie_user_favorites
+        WHERE user_id = ? AND movie_id = ?
+    `;
+
+    db.run(removeFavoriteQuery, [userId, movie_id], (err) => {
+        if (err) return res.status(500).send("Error al eliminar de favoritos.");
+
+        res.redirect(`/pelicula/${movie_id}?successMessage=Película eliminada de favoritos`);
+    });
+});
+
+// Ruta para mostrar el perfil de un usuario específico, incluyendo favoritos y reseñas
+app.get('/users/:id/profile', isAuthenticated, (req, res) => {
     const userId = req.params.id;
+
+    // Consulta para obtener los detalles básicos del usuario
+    const userQuery = `
+        SELECT user_name, user_username, user_email
+        FROM users
+        WHERE user_id = ?`;
 
     // Consulta para obtener las reseñas del usuario junto con los títulos de las películas
     const userReviewsQuery = `
         SELECT m.title AS movie_title, mu.rating, mu.review
         FROM movie_user mu
         JOIN movie m ON mu.movie_id = m.movie_id
-        WHERE mu.user_id = ?
-    `;
+        WHERE mu.user_id = ?`;
 
-    // Consulta para obtener los detalles básicos del usuario
-    const userQuery = `SELECT user_name, user_username, user_email FROM users WHERE user_id = ?`;
+    // Consulta para obtener las películas favoritas del usuario
+    const userFavoritesQuery = `
+        SELECT m.title AS favorite_title, m.release_date
+        FROM movie_user_favorites muf
+        JOIN movie m ON muf.movie_id = m.movie_id
+        WHERE muf.user_id = ?`;
 
-    // Ejecutar ambas consultas en paralelo
+    // Ejecutar las consultas en paralelo
     db.get(userQuery, [userId], (err, user) => {
         const isAdmin = req.session.user && req.session.user.is_admin === 1;
+
         if (err) {
             console.error("Error al obtener los datos del usuario:", err);
             return res.status(500).send('Error al obtener los datos del usuario.');
         }
+
         if (!user) {
             return res.status(404).send('Usuario no encontrado.');
         }
 
+        // Obtener reseñas del usuario
         db.all(userReviewsQuery, [userId], (err, reviews) => {
             if (err) {
                 console.error("Error al obtener las reseñas del usuario:", err);
                 return res.status(500).send('Error al obtener las reseñas del usuario.');
             }
 
-            // Renderizar la vista de perfil con los datos del usuario y sus reseñas
-            res.render('user_profile', { user, reviews, isAdmin });
+            // Obtener favoritos del usuario
+            db.all(userFavoritesQuery, [userId], (err, favorites) => {
+                if (err) {
+                    console.error("Error al obtener los favoritos del usuario:", err);
+                    return res.status(500).send('Error al obtener los favoritos del usuario.');
+                }
+
+                // Renderizar la vista de perfil con los datos del usuario, reseñas y favoritos
+                res.render('user_profile', { user, reviews, favorites, isAdmin });
+            });
         });
     });
 });
@@ -398,8 +481,14 @@ app.get('/buscar', (req, res) => {
 // Ruta para la página de datos de una película particular
 app.get('/pelicula/:id', (req, res) => {
     const movieId = req.params.id;
+    const user = req.session.user; // Obtener usuario desde la sesión
+    const userId = user ? user.user_id : null;
     const successMessage = req.session.successMessage;
     delete req.session.successMessage;  // Limpiar el mensaje de la sesión
+    const isFavoriteQuery = `
+        SELECT 1 FROM movie_user_favorites
+        WHERE user_id = ? AND movie_id = ?
+    `;
 
     // Consulta principal para obtener los detalles básicos de la película
     const movieQuery = `SELECT * FROM movie WHERE movie_id = ?`;
@@ -534,25 +623,28 @@ app.get('/pelicula/:id', (req, res) => {
 
                 completedQueries++;
                 if (completedQueries === queries.length) {
-                    // Ejecutar la consulta para obtener el puntaje promedio
-                    db.get(averageRatingQuery, [movieId], (err, avgRatingRow) => {
-                        if (err) {
-                            console.error("Error al cargar el puntaje promedio:", err);
-                            return res.status(500).send("Error al cargar el puntaje promedio.");
-                        }
 
-                        // Asignar el puntaje promedio a la variable movieData
+                    // Consulta para obtener el puntaje promedio
+                    db.get(averageRatingQuery, [movieId], (err, avgRatingRow) => {
+                        if (err) return res.status(500).send("Error al cargar el puntaje promedio.");
+
                         movieData.average_rating = avgRatingRow ? avgRatingRow.average_rating : null;
 
-                        // Ejecutar la consulta para obtener los comentarios
                         db.all(commentsQuery, [movieId], (err, comments) => {
-                            if (err) {
-                                console.error("Error al cargar los comentarios:", err);
-                                return res.status(500).send("Error al cargar los comentarios.");
+                            if (err) return res.status(500).send("Error al cargar los comentarios.");
+
+                            // Si el usuario no está autenticado, renderizar sin favoritos
+                            if (!userId) {
+                                return res.render('pelicula', { movie: movieData, comments, isFavorite: false, successMessage, user });
                             }
 
-                            // Renderizar la vista con movieData y los comentarios
-                            res.render('pelicula', { movie: movieData, comments, successMessage });
+                            // Verificar si la película está en favoritos
+                            db.get(isFavoriteQuery, [userId, movieId], (err, row) => {
+                                if (err) return res.status(500).send("Error al verificar favoritos.");
+
+                                const isFavorite = !!row;
+                                res.render('pelicula', { movie: movieData, comments, isFavorite, successMessage, user });
+                            });
                         });
                     });
                 }

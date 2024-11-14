@@ -51,6 +51,26 @@
             list-style-type: none;
             padding: 0;
         }
+        .favorite-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .favorite-item{
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1em;
+            padding: 1em;
+            transition: background 0.3s ease;
+        }
+        .favorite-title{
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #333;
+        }
+        .favorite-item:hover {
+            background: #f1f1ff;
+        }
         .review-item {
             background: #fafafa;
             border: 1px solid #ddd;
@@ -148,6 +168,19 @@
         </ul>
     <% } else { %>
         <p>Este usuario no ha realizado ninguna reseña.</p>
+    <% } %>
+    <h2>Películas favoritas del Usuario</h2>
+    <% if (favorites.length > 0) { %>
+        <ul class="favorite-list">
+            <% favorites.forEach(favorite => { %>
+                <li class="favorite-item">
+                    <div class="favorite-title">🎬 <%= favorite.favorite_title %></div>
+                    <p><strong>Fecha de lanzamiento:</strong> <%= favorite.release_date %></p>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <p>Este usuario no tiene películas favoritas.</p>
     <% } %>
     <% if (isAdmin){ %>
         <a href="/users" class="back-button">← Volver a la lista de usuarios</a>
