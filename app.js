@@ -240,6 +240,42 @@ app.post('/login', (req, res) => {
     });
 });
 
+// Ruta para mostrar el perfil de un usuario específico, solo accesible para administradores
+app.get('/users/:id/profile', isAdmin, (req, res) => {
+    const userId = req.params.id;
+
+    // Consulta para obtener las reseñas del usuario junto con los títulos de las películas
+    const userReviewsQuery = `
+        SELECT m.title AS movie_title, mu.rating, mu.review
+        FROM movie_user mu
+        JOIN movie m ON mu.movie_id = m.movie_id
+        WHERE mu.user_id = ?
+    `;
+
+    // Consulta para obtener los detalles básicos del usuario
+    const userQuery = `SELECT user_name, user_username, user_email FROM users WHERE user_id = ?`;
+
+    // Ejecutar ambas consultas en paralelo
+    db.get(userQuery, [userId], (err, user) => {
+        if (err) {
+            console.error("Error al obtener los datos del usuario:", err);
+            return res.status(500).send('Error al obtener los datos del usuario.');
+        }
+        if (!user) {
+            return res.status(404).send('Usuario no encontrado.');
+        }
+
+        db.all(userReviewsQuery, [userId], (err, reviews) => {
+            if (err) {
+                console.error("Error al obtener las reseñas del usuario:", err);
+                return res.status(500).send('Error al obtener las reseñas del usuario.');
+            }
+
+            // Renderizar la vista de perfil con los datos del usuario y sus reseñas
+            res.render('user_profile', { user, reviews });
+        });
+    });
+});
 
 // Asociar una película a un usuario autenticado con puntuación y reseña
 app.post('/movies', isAuthenticated, (req, res) => {
