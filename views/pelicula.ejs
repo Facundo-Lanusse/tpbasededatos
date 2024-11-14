@@ -624,8 +624,7 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                movie_id: movieId,
-                userId: <%= user.user_id %>
+                movie_id: movieId
             })
         }).then(response => {
             if (response.ok) {
