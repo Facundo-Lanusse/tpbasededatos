@@ -115,6 +115,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            transition: transform 0.4s ease;
+        }
+
+        .menu-button.open {
+            transform: rotate(90deg);
         }
 
         .menu-button div {
@@ -122,6 +127,19 @@
             height: 3px;
             background-color: white;
             margin: 3px 0;
+            transition: transform 0.4s ease;
+        }
+
+        .menu-button.open div:nth-child(1) {
+            transform: translateY(9px) rotate(45deg);
+        }
+
+        .menu-button.open div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-button.open div:nth-child(3) {
+            transform: translateY(-9px) rotate(-45deg);
         }
 
         /* Contenedor para los botones desplegables */
@@ -129,7 +147,7 @@
             position: absolute;
             top: 70px; /* Espacio entre el botón de hamburguesa y el menú desplegable */
             left: 20px;
-            display: none;
+            display: flex;
             flex-direction: column;
             gap: 10px;
             background-color: white;
@@ -137,14 +155,24 @@
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 1;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
+        /* Cuando el menú está abierto */
+        .menu-content.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
 <header>
     <!-- Botón de menú hamburguesa -->
-    <button class="menu-button" onclick="toggleMenu()">
+    <button class="menu-button" id="menuButton" onclick="toggleMenu()">
         <div></div>
         <div></div>
         <div></div>
@@ -180,8 +208,12 @@
 
 <script>
     function toggleMenu() {
-        const menu = document.getElementById("menuContent");
-        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+        const menuButton = document.getElementById("menuButton");
+        const menuContent = document.getElementById("menuContent");
+
+        // Cambia la clase para activar/desactivar la animación
+        menuButton.classList.toggle("open");
+        menuContent.classList.toggle("open");
     }
 </script>
 
