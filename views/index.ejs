@@ -1,205 +1,189 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <title>MovieWeb</title>
-  
-  <!-- Para mayor organización ponemos los botones login y register en el header -->
-  <style>
-    /* Estilos generales */
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f0f0f0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center; /* Centra el contenido verticalmente */
-      align-items: center; /* Centra el contenido horizontalmente */
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
-      position: relative;
-    }
-    .signup-button{
-      position: absolute;
-      top: 20px;
-      margin-right: auto;
-      right: 170px;
-      background-color: #0078d4;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-    /*Boton de log out*/
-    .logout-button{
-      position: absolute;
-      top: 20px;
-      margin-right: auto;
-      right: 20px;
-      background-color: #0078d4;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-    /* Botón de Log In */
-    .login-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: #0078d4;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
+    <title>MovieWeb</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
 
-    .list-users {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        background-color: #0078d4;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        text-decoration: none;
-        transition: background-color 0.3s ease;
-    }
+        /* Botones de cabecera */
+        .menu {
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            width: auto;
+            text-align: center;
+            background-color: white;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
 
-    .login-button:hover{
-      background-color: #0056b3;
-    }
+        .menu:hover {
+            background-color: #0056b3;
+            color: white;
+        }
 
-    .signup-button:hover {
-      background-color: #0056b3;
-    }
+        /* Estilos del contenido de la página */
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
 
-    /* Estilos del contenido de la página */
-    h1 {
-      font-size: 36px;
-      color: #333;
-      margin-bottom: 30px;
-      text-align: center; /* Alineación central del texto */
-    }
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 40px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    form {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      background-color: white;
-      padding: 20px;
-      border-radius: 40px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        /* Estilo de los inputs */
+        input[type="text"], select {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 40px;
+            width: 250px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
 
-    /* Estilo de los inputs */
-    input[type="text"], select {
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 40px;
-      width: 250px;
-      outline: none;
-      transition: border-color 0.3s ease;
-    }
+        input[type="text"]:focus, select:focus {
+            border-color: #0078d4;
+        }
 
-    input[type="text"]:focus, select:focus {
-      border-color: #0078d4;
-    }
+        button[type="submit"] {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-    button[type="submit"] {
-      background-color: #0078d4;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
 
-    button[type="submit"]:hover {
-      background-color: #0056b3;
-    }
+        /* Estilo del selector */
+        select {
+            width: 100px;
+            appearance: none;
+            background-color: #f5f5f5;
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 viewBox%3D%220 0 24 24%22 fill%3D%22%23333%22%3E%3Cpath d%3D%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
 
-    select {
-      padding: 12px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 40px;
-      width: 100px;
-      outline: none;
-      transition: border-color 0.3s ease;
-      background-color: #f5f5f5;
-      background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 viewBox%3D%220 0 24 24%22 fill%3D%22%23333%22%3E%3Cpath d%3D%22M7 10l5 5 5-5z%22/%3E%3C/svg%3E'); /* Flecha personalizada */
-      background-repeat: no-repeat;
-      background-position: right 15px center; /* Mueve la flecha 15px desde la derecha */
-      background-size: 16px;
-      appearance: none; /* Oculta la flecha predeterminada del sistema */
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      cursor: pointer;
-    }
+        /* Botón de menú tipo hamburguesa */
+        .menu-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-    select:focus {
-      border-color: #0078d4;
-    }
+        .menu-button div {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 3px 0;
+        }
 
-    select:hover {
-      border-color: #0078d4;
-    }
-    .greeting {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        font-size: 16px;
-        color: #333;
-    }
+        /* Contenedor para los botones desplegables */
+        .menu-content {
+            position: absolute;
+            top: 70px; /* Espacio entre el botón de hamburguesa y el menú desplegable */
+            left: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
 
-  </style>
+    </style>
 </head>
 <body>
 <header>
-  <% if (!isAuthenticated) { %>
-    <a href="/login" class="login-button">Iniciar sesión</a>
-    <a href="/signup" class="signup-button">Registrarse</a>
-  <% } else if (isAdmin) { %>
-          <!-- Mostrar solo si el usuario es admin -->
-          <a href="/users" class="list-users">Lista de usuario</a>
-          <a href="/logout" class="logout-button">Cerrar sesión</a>
-  <% } else { %>
-      <!-- Mostrar solo si el usuario está autenticado -->
-    <a href="/logout" class="logout-button">Cerrar sesión</a>
-  <% } %>
+    <!-- Botón de menú hamburguesa -->
+    <button class="menu-button" onclick="toggleMenu()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+
+    <!-- Contenedor de los botones de navegación -->
+    <div class="menu-content" id="menuContent">
+        <% if (!isAuthenticated) { %>
+            <a href="/login" class="menu">Iniciar sesión</a>
+            <a href="/signup" class="menu">Registrarse</a>
+        <% } else if (isAdmin) { %>
+            <a href="/users" class="menu">Lista de usuario</a>
+            <a href="/logout" class="menu">Cerrar sesión</a>
+        <% } else { %>
+            <a href="/logout" class="menu">Cerrar sesión</a>
+        <% } %>
+    </div>
 </header>
+
 <h1>MovieWeb</h1>
-<!-- Así se comenta, god-->
-<!-- En la main page ahora hay una caja en la cual podemos seleccionar que tipo buscar (película, actor o director) -->
+
 <form action="/buscar" method="GET">
-  <select name="type" required>
-    <option value="todo">Todo</option> <!--agrego selector de buscar por all-->
-    <option value="movie">Película</option>
-    <option value="actor">Actor</option>
-    <option value="director">Director</option>
-    <option value="keyword">Keyword</option><!--agrego selector de buscar por keyword -->
-  </select>
-  <input type="text" name="q" placeholder="Buscar..." required />
-  <button type="submit">Buscar</button>
+    <select name="type" required>
+        <option value="todo">Todo</option>
+        <option value="movie">Película</option>
+        <option value="actor">Actor</option>
+        <option value="director">Director</option>
+        <option value="keyword">Keyword</option>
+    </select>
+    <input type="text" name="q" placeholder="Buscar..." required />
+    <button type="submit">Buscar</button>
 </form>
+
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById("menuContent");
+        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+</script>
+
 </body>
-</html> 
+</html>
